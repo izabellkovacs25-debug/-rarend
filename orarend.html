@@ -1,0 +1,666 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9B – Éppen milyen órám van?</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #f8dfe8, #dcebdc);
+    min-height: 100vh;
+    color: #394b40;
+}
+
+header {
+    text-align: center;
+    color: #465b4c;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    margin: 0 0 8px;
+    font-size: 1.8em;
+}
+
+header p {
+    margin: 5px;
+    opacity: 0.85;
+}
+
+#clock {
+    text-align: center;
+    color: #465b4c;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.status-card {
+    max-width: 600px;
+    margin: 0 auto 25px;
+    background: #fffaf8;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 25px #82687920;
+    text-align: center;
+    border-top: 8px solid #b8cdb5;
+}
+
+.status-card.lesson { border-color: #80a889; }
+.status-card.break { border-color: #e8a5bd; }
+.status-card.before { border-color: #c98da8; }
+.status-card.after { border-color: #92b69a; }
+.status-card.weekend { border-color: #d9a1b7; }
+.status-card.hole { border-color: #c78ca8; }
+
+.status-tag {
+    display: inline-block;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: #405447;
+    background: #dcebdc;
+}
+
+.lesson .status-tag { background: #c6dfc8; }
+.break .status-tag { background: #f5d6e2; }
+.before .status-tag { background: #efd0df; }
+.after .status-tag { background: #dcebdc; }
+.weekend .status-tag { background: #f5d6e2; }
+.hole .status-tag { background: #ead4e0; }
+
+.subject {
+    font-size: 2.2em;
+    font-weight: bold;
+    margin: 5px 0;
+    color: #405447;
+    overflow-wrap: anywhere;
+}
+
+.detail {
+    font-size: 1.05em;
+    color: #718075;
+    margin: 8px 0;
+}
+
+.countdown {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #bd7393;
+    margin-top: 12px;
+}
+
+.progress-outer {
+    margin-top: 16px;
+    width: 100%;
+    height: 10px;
+    border-radius: 10px;
+    background: #eee8e8;
+    overflow: hidden;
+}
+
+.progress-inner {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #e5a8c0, #91b99a);
+    border-radius: 10px;
+    transition: width 0.5s linear;
+}
+
+/* Kis ebédszünet-rublika */
+.lunch-card {
+    max-width: 320px;
+    margin: 0 auto 25px;
+    padding: 14px 18px;
+    background: #f9e5ec;
+    border: 2px solid #e5a8c0;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 5px 15px #82687920;
+}
+
+.lunch-card h3 {
+    margin: 0 0 6px;
+    font-size: 1.1em;
+    color: #a75f7d;
+}
+
+.lunch-card p {
+    margin: 4px 0;
+    font-size: 0.9em;
+    color: #765565;
+}
+
+.table-wrapper {
+    max-width: 1100px;
+    margin: auto;
+    overflow-x: auto;
+    border-radius: 16px;
+    box-shadow: 0 8px 22px #82687920;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 620px;
+    background: #fffaf8;
+}
+
+caption {
+    color: #465b4c;
+    font-size: 1.2em;
+    padding: 12px;
+    font-weight: bold;
+}
+
+th, td {
+    border: 1px solid #eadfe3;
+    padding: 10px 7px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+thead th {
+    background: #dcebdc;
+    color: #405447;
+}
+
+tbody th {
+    background: #f5e4eb;
+    color: #765565;
+    white-space: nowrap;
+}
+
+tbody tr:nth-child(even) td {
+    background: #fdf4f6;
+}
+
+td.today-col {
+    background: #f8e1e9 !important;
+}
+
+tr.current-row td,
+tr.current-row th {
+    background: #cce3ce !important;
+    color: #354c3b;
+    font-weight: bold;
+}
+
+td.empty-cell {
+    color: #b39ca7;
+    font-style: italic;
+}
+
+td small {
+    display: block;
+    margin-top: 5px;
+    color: #8a7a81;
+    font-weight: normal;
+    font-size: 0.85em;
+}
+
+footer {
+    text-align: center;
+    color: #64796a;
+    font-size: 0.85em;
+    margin: 25px auto 10px;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 12px;
+    }
+
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    .status-card {
+        padding: 20px 14px;
+    }
+
+    .subject {
+        font-size: 1.8em;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>9B – Éppen milyen órán poshadok? 🌸</h1>
+    <p>Biatorbágyi Innovatív Technikum és Gimnázium</p>
+</header>
+
+<div id="clock">--:--:--</div>
+
+<div id="lunchCard" class="lunch-card" style="display:none;">
+    <h3>🍽️ EBÉDSZÜNET</h3>
+    <p id="lunchTime"></p>
+    <p id="lunchCountdown"></p>
+</div>
+
+<div id="statusCard" class="status-card">
+    <div class="status-tag" id="statusTag">Betöltés...</div>
+    <div class="subject" id="subjectText">-</div>
+    <div class="detail" id="detailText"></div>
+    <div class="countdown" id="countdownText"></div>
+    <div class="progress-outer">
+        <div class="progress-inner" id="progressBar"></div>
+    </div>
+</div>
+
+<div class="table-wrapper">
+<table>
+    <caption>Heti órarend – 9B 🌿</caption>
+    <thead>
+        <tr>
+            <th>Óra</th>
+            <th>Hétfő</th>
+            <th>Kedd</th>
+            <th>Szerda</th>
+            <th>Csütörtök</th>
+            <th>Péntek</th>
+        </tr>
+    </thead>
+    <tbody id="scheduleBody"></tbody>
+</table>
+</div>
+
+<footer>
+    🌸 45 perces tanórák · 25 perces ebédszünet 🌿
+    <br>Az oldal automatikusan frissül.
+</footer>
+
+<script>
+function toMin(h, m) {
+    return h * 60 + m;
+}
+
+function fmt(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = Math.floor(minutes % 60);
+
+    return String(h).padStart(2, '0') + ':' +
+           String(m).padStart(2, '0');
+}
+
+const dayNames = [
+    'Vasárnap', 'Hétfő', 'Kedd', 'Szerda',
+    'Csütörtök', 'Péntek', 'Szombat'
+];
+
+// Az ebédszünet az adott óra után következik.
+const lunchBreakAfter = {
+    1: 4,
+    2: 5,
+    3: 4,
+    4: 5,
+    5: 5
+};
+
+// Tanórák és szünetek kiszámítása
+function getPeriods(day) {
+    const result = [];
+    let start = toMin(8, 15);
+
+    for (let num = 1; num <= 7; num++) {
+        const end = start + 45;
+
+        result.push({
+            num: num,
+            start: start,
+            end: end
+        });
+
+        if (num < 7) {
+            let breakLength = 10;
+
+            if (num === 2) {
+                breakLength = 15;
+            }
+
+            if (num === lunchBreakAfter[day]) {
+                breakLength = 25;
+            }
+
+            start = end + breakLength;
+        }
+    }
+
+    return result;
+}
+
+// A 9B órarendje
+const schedule = {
+    1: {
+        name: 'Hétfő',
+        lessons: [
+            'IRODALOM', 'TESI', 'MUNKISMR', 'FIZIKA',
+            'MATEK', 'ANGOL', 'PROG AL'
+        ]
+    },
+    2: {
+        name: 'Kedd',
+        lessons: [
+            'MAGYAR', 'TESI', 'NÉMET', 'TÖRI',
+            'MATEK', 'DIGKULT', null
+        ]
+    },
+    3: {
+        name: 'Szerda',
+        lessons: [
+            'TÖRI', 'IRODALOM', 'MATEK', 'ANGOL',
+            'OFŐ', 'INFTÁ VI.',
+            'IKT I.'
+        ]
+    },
+    4: {
+        name: 'Csütörtök',
+        lessons: [
+            'IRODALOM', 'INFTÁ VI.',
+            'ANGOL', 'NÉMET', 'PROG AL',
+            'TÖRI', 'GÉPÍRÁS'
+        ]
+    },
+    5: {
+        name: 'Péntek',
+        lessons: [
+            'TESI', 'ANGOL', 'NÉMET',
+            'TERMÉSZET', 'TERMÉSZET',
+            'INFTÁ VI.', null
+        ]
+    }
+};
+
+// A heti táblázat felépítése
+function buildTable() {
+    const tbody = document.getElementById('scheduleBody');
+    tbody.innerHTML = '';
+
+    for (let i = 0; i < 7; i++) {
+        const tr = document.createElement('tr');
+        tr.id = 'row-p' + (i + 1);
+
+        const th = document.createElement('th');
+        th.textContent = (i + 1) + '. óra';
+        tr.appendChild(th);
+
+        for (let day = 1; day <= 5; day++) {
+            const td = document.createElement('td');
+            td.id = 'cell-' + day + '-' + (i + 1);
+
+            const lesson = schedule[day].lessons[i];
+            const period = getPeriods(day)[i];
+
+            const subject = document.createElement('div');
+            subject.textContent = lesson || 'Lyukasóra';
+            td.appendChild(subject);
+
+            const time = document.createElement('small');
+            time.textContent =
+                fmt(period.start) + '–' + fmt(period.end);
+            td.appendChild(time);
+
+            if (!lesson) {
+                td.classList.add('empty-cell');
+            }
+
+            tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+    }
+}
+
+function clearHighlights() {
+    document.querySelectorAll('.current-row').forEach(el => {
+        el.classList.remove('current-row');
+    });
+
+    document.querySelectorAll('.today-col').forEach(el => {
+        el.classList.remove('today-col');
+    });
+}
+
+// Az oldal másodpercenként frissül
+function update() {
+    const now = new Date();
+    const day = now.getDay();
+
+    document.getElementById('clock').textContent =
+        now.toLocaleTimeString('hu-HU') +
+        ' — ' + dayNames[day];
+
+    const nowMin =
+        now.getHours() * 60 +
+        now.getMinutes() +
+        now.getSeconds() / 60;
+
+    const card = document.getElementById('statusCard');
+    const lunchCard = document.getElementById('lunchCard');
+
+    const lunchTime = document.getElementById('lunchTime');
+    const lunchCountdown = document.getElementById('lunchCountdown');
+
+    const tag = document.getElementById('statusTag');
+    const subjectText = document.getElementById('subjectText');
+    const detailText = document.getElementById('detailText');
+    const countdownText = document.getElementById('countdownText');
+    const progressBar = document.getElementById('progressBar');
+
+    clearHighlights();
+
+    card.className = 'status-card';
+    progressBar.style.width = '0%';
+
+    if (day === 0 || day === 6) {
+        lunchCard.style.display = 'none';
+        card.style.display = 'block';
+        card.classList.add('weekend');
+
+        tag.textContent = 'Hétvége';
+        subjectText.textContent = 'Nincs tanítás';
+        detailText.textContent = 'Élvezd a szabadidődet! 🌸';
+        countdownText.textContent = '';
+        return;
+    }
+
+    const daySchedule = schedule[day];
+    const periods = getPeriods(day);
+
+    // A mai nap oszlopának kiemelése
+    for (let i = 1; i <= 7; i++) {
+        const cell = document.getElementById(
+            'cell-' + day + '-' + i
+        );
+
+        if (cell) {
+            cell.classList.add('today-col');
+        }
+    }
+
+    // Ebédszünet időpontja
+    const lunchAfter = lunchBreakAfter[day];
+    const lunchPeriod = periods[lunchAfter - 1];
+
+    const lunchStart = lunchPeriod.end;
+    const lunchEnd = lunchStart + 25;
+
+    // Ebédszünetben csak a kis rublika látszik
+    if (nowMin >= lunchStart && nowMin < lunchEnd) {
+        card.style.display = 'none';
+        lunchCard.style.display = 'block';
+
+        lunchTime.textContent =
+            fmt(lunchStart) + '–' + fmt(lunchEnd);
+
+        const secondsLeft = Math.ceil(
+            (lunchEnd - nowMin) * 60
+        );
+
+        lunchCountdown.textContent =
+            secondsLeft <= 60
+                ? secondsLeft + ' másodperc van hátra'
+                : Math.ceil(lunchEnd - nowMin) +
+                  ' perc van hátra';
+
+        return;
+    }
+
+    lunchCard.style.display = 'none';
+    card.style.display = 'block';
+
+    // Aktuális tanóra
+    let current = null;
+
+    for (const p of periods) {
+        if (nowMin >= p.start && nowMin < p.end) {
+            current = p;
+            break;
+        }
+    }
+
+    if (current) {
+        const row = document.getElementById(
+            'row-p' + current.num
+        );
+
+        if (row) {
+            row.classList.add('current-row');
+        }
+
+        const lesson = daySchedule.lessons[current.num - 1];
+
+        const percent = Math.min(
+            100,
+            Math.max(
+                0,
+                (nowMin - current.start) /
+                (current.end - current.start) * 100
+            )
+        );
+
+        progressBar.style.width = percent + '%';
+
+        if (lesson) {
+            card.classList.add('lesson');
+            tag.textContent = current.num + '. óra folyik';
+            subjectText.textContent = lesson;
+        } else {
+            card.classList.add('hole');
+            tag.textContent = current.num + '. óra';
+            subjectText.textContent = 'Lyukasóra';
+        }
+
+        detailText.textContent =
+            fmt(current.start) + '–' + fmt(current.end);
+
+        const secondsLeft = Math.ceil(
+            (current.end - nowMin) * 60
+        );
+
+        countdownText.textContent =
+            secondsLeft <= 60
+                ? secondsLeft + ' másodperc múlva vége'
+                : Math.ceil(current.end - nowMin) +
+                  ' perc múlva vége';
+
+        return;
+    }
+
+    // Tanítás előtt
+    if (nowMin < periods[0].start) {
+        const first = periods[0];
+
+        card.classList.add('before');
+        tag.textContent = 'Tanítás előtt';
+
+        subjectText.textContent =
+            daySchedule.lessons[0] || 'Lyukasóra';
+
+        detailText.textContent =
+            '1. óra: ' + fmt(first.start) +
+            '–' + fmt(first.end);
+
+        countdownText.textContent =
+            Math.ceil(first.start - nowMin) +
+            ' perc múlva kezdődik';
+
+        document.getElementById('row-p1')
+            .classList.add('current-row');
+
+        return;
+    }
+
+    // Tanítás után
+    const last = periods[periods.length - 1];
+
+    if (nowMin >= last.end) {
+        card.classList.add('after');
+        tag.textContent = 'Vége a mai tanításnak';
+        subjectText.textContent = 'Vége a szenvedésnek 🎉';
+
+        detailText.textContent =
+            'Az utolsó óra ' + fmt(last.end) +
+            '-kor ért véget.';
+
+        countdownText.textContent = '';
+        return;
+    }
+
+    // Szünet a tanórák között
+    let next = null;
+
+    for (const p of periods) {
+        if (p.start > nowMin) {
+            next = p;
+            break;
+        }
+    }
+
+    if (next) {
+        const nextLesson =
+            daySchedule.lessons[next.num - 1];
+
+        card.classList.add('break');
+        tag.textContent = 'Szünet';
+        subjectText.textContent = nextLesson || 'Lyukasóra';
+
+        detailText.textContent =
+            'Következő: ' + next.num + '. óra, ' +
+            fmt(next.start) + '–' + fmt(next.end);
+
+        countdownText.textContent =
+            Math.ceil(next.start - nowMin) +
+            ' perc múlva kezdődik';
+
+        const row = document.getElementById(
+            'row-p' + next.num
+        );
+
+        if (row) {
+            row.classList.add('current-row');
+        }
+    }
+}
+
+buildTable();
+update();
+setInterval(update, 1000);
+</script>
+
+</body>
+</html>
